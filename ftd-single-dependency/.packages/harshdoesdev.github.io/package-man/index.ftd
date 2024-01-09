@@ -1,0 +1,20 @@
+-- import: harshdoesdev.github.io/package-man/assets
+
+
+-- component greet:
+
+-- ftd.column:
+width: fill-container
+height: fill-container
+align-content: center
+
+-- ftd.image: $assets.files.logo.svg 
+
+-- ftd.text: Hello, World!
+
+-- end: ftd.column
+
+-- end: greet
+
+
+-- greet:

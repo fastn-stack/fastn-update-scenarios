@@ -1,0 +1,12 @@
+-- component greet:
+caption string name:
+
+-- ftd.text: $join(a = Hello, b = $greet.name)
+
+-- end: greet
+
+-- string join(a, b):
+string a:
+string b:
+
+a + " " + b

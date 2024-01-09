@@ -1,0 +1,6 @@
+-- import: fastn
+
+-- fastn.package: single-dep
+
+-- fastn.dependency: harshdoesdev.github.io/package-man
+
