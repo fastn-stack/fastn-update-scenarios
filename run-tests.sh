@@ -1,14 +1,15 @@
 #!/bin/bash
 
 count_traces() {
-    local trace_output=$1
-    local read_count=$(grep -c 'read_content' <<< "$trace_output")
-    local read_dir_count=$(grep -c 'read_dir' <<< "$trace_output")
-    local copy_count=$(grep -c 'copy' <<< "$trace_output")
-    local write_count=$(grep -c 'write_content' <<< "$trace_output")
+    trace_file_content=$1
 
-    local result=("$read_count" "$read_dir_count" "$copy_count" "$write_count")
-    echo "${result[@]}"
+    read_content_lines=$(echo "$trace_file_content" | grep -E 'read_content|write_content|read_dir')
+
+    traces=($(echo "$read_content_lines" | grep -oE '\/[^ ]+' | cut -c 2- | sort -u))
+
+    for trace in "${traces[@]}"; do
+        echo "$trace"
+    done
 }
 
 for dir in */; do
@@ -17,6 +18,7 @@ for dir in */; do
     cd "$dir" || exit
 
     temp_trace_file=$(mktemp)
+    fastn update >/dev/null 2>&1
     nohup fastn --trace serve > "$temp_trace_file" 2>&1 &
 
     serve_pid=$!
@@ -34,15 +36,17 @@ for dir in */; do
     kill -15 $serve_pid
 
     rm "$temp_trace_file"
+    echo "- $dir_name:"
+    echo "  - read_content: ${#final_traces[@]}"
+    
+    current_directory=$(pwd)
+    
+    for ((i=0; i<${#final_traces[@]}; i++)); do
+        trace_file="${final_traces[$i]}"
+        echo "     - $trace_file"
+    done
 
-    echo "Summary for package $dir_name:"
-    echo   "|-----------------|-----------------|-----------------|-----------------|-----------------|"
-    printf "| %-15s | %-15s | %-15s | %-15s | %-15s |\n" "Operation" "File Reads" "Dir Reads" "Copies" "Writes"
-    echo   "|-----------------|-----------------|-----------------|-----------------|-----------------|"
-    printf "| Startup         | %-15s | %-15s | %-15s | %-15s |\n" "${initial_traces[@]}"
-    printf "| Request         | %-15s | %-15s | %-15s | %-15s |\n" "${final_traces[@]}"
-    echo   "|-----------------|-----------------|-----------------|-----------------|-----------------|"
-    echo
+    echo ""
 
     cd ..
 done
