@@ -1,0 +1,3 @@
+-- import: hello-world/assets
+
+-- ftd.image: $assets.files.logo-dark.svg
