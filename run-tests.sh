@@ -12,10 +12,27 @@ count_traces() {
     done
 }
 
-for dir in */; do
-    dir_name=$(echo "$dir" | sed 's:/$::')
+print_report() {
+    local dir_name=$1
+    local final_traces=("${@:2}")
 
-    cd "$dir" || exit
+    echo "┌─── $dir_name ────────────────────────────"
+    echo "│   read_content: ${#final_traces[@]}"
+    echo "│"
+    
+    for trace_file in "${final_traces[@]}"; do
+        echo "│   ├─ $trace_file"
+    done
+
+    echo "└───────────────────────────────────────"
+}
+
+process_directory() {
+    local dir=$1
+
+    dir_name=$(basename "$dir")
+
+    cd "$dir" || { echo "Error: Could not enter directory $dir"; return; }
 
     temp_trace_file=$(mktemp)
     fastn update >/dev/null 2>&1
@@ -36,15 +53,15 @@ for dir in */; do
     kill -15 $serve_pid
 
     rm "$temp_trace_file"
-    echo "- $dir_name:"
-    echo "  - read_content: ${#final_traces[@]}"
-    
-    for ((i=0; i<${#final_traces[@]}; i++)); do
-        trace_file="${final_traces[$i]}"
-        echo "     - $trace_file"
-    done
-
-    echo ""
+    print_report "$dir_name" "${final_traces[@]}"
 
     cd ..
-done
+}
+
+if [ $# -eq 0 ]; then
+    for dir in */; do
+        process_directory "$dir"
+    done
+else
+    process_directory "$1"
+fi
