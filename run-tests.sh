@@ -39,8 +39,6 @@ for dir in */; do
     echo "- $dir_name:"
     echo "  - read_content: ${#final_traces[@]}"
     
-    current_directory=$(pwd)
-    
     for ((i=0; i<${#final_traces[@]}; i++)); do
         trace_file="${final_traces[$i]}"
         echo "     - $trace_file"
