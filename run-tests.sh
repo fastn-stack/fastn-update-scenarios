@@ -6,15 +6,23 @@ process_logs() {
 
     # Process logs to count occurrences
     read_content_count=$(grep 'read_content' "$temp_trace_file" | wc -l)
+    write_content_count=$(grep 'write_content' "$temp_trace_file" | wc -l)
 
     # Print counts in table
     echo "| Event Type       | Count            |"
     echo "| ---------------- | ---------------- |"
     echo "| read_content     | $read_content_count |"
+    echo "| write_content     | $write_content_count |"
     
     # Extract read_content data
     echo "## Read Content Data:"
-    echo "- $(grep 'read_content' "$temp_trace_file" | sed -n 's/.*read_content \([^ ]*\).*/\1/p' | tr '\n' '\n- ' | sed '$s/- $//')"
+    
+    grep -n 'read_content' "$temp_trace_file" | sed -n 's/.*read_content \([^ ]*\).*/- \1/p'
+
+    # Extract write_content data
+    echo "## Write Content Data:"
+    
+    grep -n 'write_content' "$temp_trace_file" | sed -n 's/.*write_content \([^ ]*\).*/- \1/p'
 
     echo
 }
@@ -30,10 +38,13 @@ process_directory() {
     report_file="REPORT.md"
 
     echo "Processing $dir_name ..."
+
+    if [ -d ".packages" ]; then
+        echo "Removing .packages directory..."
+        rm -rf .packages
+    fi
     
-    fastn update > /dev/null 2>&1
-    
-    (fastn --trace serve --offline | tee "$temp_trace_file") > /dev/null 2>&1 &
+    (fastn --trace serve | tee "$temp_trace_file") > /dev/null 2>&1 &
 
     sleep 2
 
