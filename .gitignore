@@ -1,3 +1,4 @@
 .build
 .packages
 nohup.out
+traces.log

@@ -1,5 +1,0 @@
--- import: fastn
-
--- fastn.package: hello-world
-
--- fastn.dependency: super-dep
