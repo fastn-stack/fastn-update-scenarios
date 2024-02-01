@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Function to log progress
+log_progress() {
+    # clear_terminal
+    printf "\033c"
+    echo "-- fastn update/performance test scenarios --"
+    echo $1
+}
+
 process_logs() {
     echo "# $dir_name"
     echo
@@ -37,14 +45,21 @@ process_directory() {
     temp_trace_file="traces.log"
     report_file="REPORT.md"
 
-    echo "Processing $dir_name ..."
+    log_progress "Entered $dir_name"
 
     if [ -d ".packages" ]; then
-        echo "Removing .packages directory..."
+        echo "Removing .packages directory"
         rm -rf .packages
+        echo "Removed .packages directory"
     fi
+
+    log_progress "Starting the server"
     
     (fastn --trace serve | tee "$temp_trace_file") > /dev/null 2>&1 &
+
+    log_progress "Server started"
+
+    log_progress "Testing $dir_name ..."
 
     sleep 2
 
@@ -54,13 +69,15 @@ process_directory() {
 
     pkill Safari
 
+    log_progress "$dir_name testing complete!"
+
     sh ../kill.sh > /dev/null 2>&1
 
-    echo "Generating report for $dir_name ..."
+    log_progress "Now generating report for $dir_name ..."
 
     process_logs > $report_file
 
-    echo "Report generated for $dir_name ..."
+    log_progress "Report generated for $dir_name!"
 
     cd ..
 }
@@ -72,3 +89,5 @@ if [ $# -eq 0 ]; then
 else
     process_directory "$1"
 fi
+
+log_progress "All done!"
